@@ -93,7 +93,12 @@ function Hero() {
           <button className="button">Reserve a Table</button>
         </article>
         <article className="hero-image-container">
-          <img src={heroImage} alt="Little Lemon" className="hero-image" />
+          <img
+            src={heroImage}
+            alt="Little Lemon"
+            className="hero-image"
+            fetchPriority="high"
+          />
         </article>
       </div>
     </main>
