@@ -6,6 +6,12 @@ export type BookingState = {
   availableTimes: string[];
   guests: number;
   occasion: string;
+
+  isValidDate: boolean;
+  isValidTime: boolean;
+  isValidGuests: boolean;
+  isValidOccasion: boolean;
+
   setDate: (date: string) => void;
   setTime: (time: string) => void;
   setGuests: (guests: number) => void;

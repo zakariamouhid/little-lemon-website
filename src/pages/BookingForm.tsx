@@ -8,6 +8,12 @@ export function BookingForm() {
     availableTimes,
     guests,
     occasion,
+
+    isValidDate,
+    isValidTime,
+    isValidGuests,
+    isValidOccasion,
+
     handleSubmit,
     setDate,
     setTime,
@@ -35,6 +41,15 @@ export function BookingForm() {
         aria-required="true"
         aria-label="Choose reservation date"
       />
+      {!isValidDate && (
+        <p
+          className="error-message"
+          aria-labelledby="res-date"
+          aria-invalid="true"
+        >
+          Date must be today or later
+        </p>
+      )}
       <label htmlFor="res-time">Choose time {requiredIndicator}</label>
       <select
         id="res-time"
@@ -50,6 +65,15 @@ export function BookingForm() {
           </option>
         ))}
       </select>
+      {!isValidTime && (
+        <p
+          className="error-message"
+          aria-labelledby="res-time"
+          aria-invalid="true"
+        >
+          Time must be one of the available times
+        </p>
+      )}
       <label htmlFor="guests">Number of guests {requiredIndicator}</label>
       <input
         type="number"
@@ -65,6 +89,15 @@ export function BookingForm() {
         aria-valuemax={10}
         aria-label="Number of guests"
       />
+      {!isValidGuests && (
+        <p
+          className="error-message"
+          aria-labelledby="guests"
+          aria-invalid="true"
+        >
+          Number of guests must be between 1 and 10
+        </p>
+      )}
       <label htmlFor="occasion">Occasion</label>
       <select
         id="occasion"
@@ -76,6 +109,15 @@ export function BookingForm() {
         <option>Birthday</option>
         <option>Anniversary</option>
       </select>
+      {!isValidOccasion && (
+        <p
+          className="error-message"
+          aria-labelledby="occasion"
+          aria-invalid="true"
+        >
+          Occasion must be either Birthday or Anniversary
+        </p>
+      )}
       <input
         type="submit"
         value="Make Your reservation"

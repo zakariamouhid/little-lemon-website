@@ -344,3 +344,249 @@ describe("LocalStorage functionality", () => {
     expect(dateInput).toHaveValue(today);
   });
 });
+
+describe("Error message validation", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    cleanup();
+    localStorage.clear();
+  });
+
+  test("Shows error message when date is in the past", async () => {
+    render(<BookingSection />);
+    const dateInput = screen.getByLabelText("Choose reservation date");
+
+    // Wait for component to initialize
+    await waitFor(() => {
+      expect(dateInput).toBeInTheDocument();
+    });
+
+    // Get today's date and set a past date
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const pastDate = yesterday.toISOString().split("T")[0];
+
+    // Set a past date
+    fireEvent.change(dateInput, { target: { value: pastDate } });
+
+    // Wait for error message to appear
+    await waitFor(() => {
+      const errorMessage = screen.getByText("Date must be today or later");
+      expect(errorMessage).toBeInTheDocument();
+      expect(errorMessage).toHaveClass("error-message");
+      expect(errorMessage).toHaveAttribute("aria-invalid", "true");
+    });
+  });
+
+  test("Shows error message when time is empty (not selected)", async () => {
+    render(<BookingSection />);
+    const timeSelect = screen.getByLabelText("Choose reservation time");
+
+    // Wait for available times to load
+    await waitFor(() => {
+      expect(timeSelect.children.length).toBeGreaterThan(0);
+    });
+
+    // Initially, time should be empty, which is invalid
+    // The validation checks if time is in availableTimes array
+    // An empty string is not in the array, so it should show an error
+    await waitFor(() => {
+      const errorMessage = screen.getByText(
+        "Time must be one of the available times"
+      );
+      expect(errorMessage).toBeInTheDocument();
+      expect(errorMessage).toHaveClass("error-message");
+      expect(errorMessage).toHaveAttribute("aria-invalid", "true");
+    });
+
+    // Select a valid time
+    const timeOptions = Array.from(timeSelect.children) as HTMLOptionElement[];
+    if (timeOptions.length > 0) {
+      fireEvent.change(timeSelect, { target: { value: timeOptions[0].value } });
+
+      // Error should disappear when time is valid
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Time must be one of the available times")
+        ).not.toBeInTheDocument();
+      });
+    }
+  });
+
+  test("Shows error message when number of guests is less than 1", async () => {
+    render(<BookingSection />);
+    const guestsInput = screen.getByLabelText("Number of guests");
+
+    // Wait for component to initialize
+    await waitFor(() => {
+      expect(guestsInput).toBeInTheDocument();
+    });
+
+    // Set guests to 0 (invalid)
+    fireEvent.change(guestsInput, { target: { value: "0" } });
+
+    // Wait for error message to appear
+    await waitFor(() => {
+      const errorMessage = screen.getByText(
+        "Number of guests must be between 1 and 10"
+      );
+      expect(errorMessage).toBeInTheDocument();
+      expect(errorMessage).toHaveClass("error-message");
+      expect(errorMessage).toHaveAttribute("aria-invalid", "true");
+    });
+  });
+
+  test("Shows error message when number of guests is greater than 10", async () => {
+    render(<BookingSection />);
+    const guestsInput = screen.getByLabelText("Number of guests");
+
+    // Wait for component to initialize
+    await waitFor(() => {
+      expect(guestsInput).toBeInTheDocument();
+    });
+
+    // Set guests to 11 (invalid)
+    fireEvent.change(guestsInput, { target: { value: "11" } });
+
+    // Wait for error message to appear
+    await waitFor(() => {
+      const errorMessage = screen.getByText(
+        "Number of guests must be between 1 and 10"
+      );
+      expect(errorMessage).toBeInTheDocument();
+      expect(errorMessage).toHaveClass("error-message");
+      expect(errorMessage).toHaveAttribute("aria-invalid", "true");
+    });
+  });
+
+  test("Shows error message when occasion is empty (invalid)", async () => {
+    render(<BookingSection />);
+    const occasionSelect = screen.getByLabelText("Choose occasion");
+
+    // Wait for component to initialize
+    await waitFor(() => {
+      expect(occasionSelect).toBeInTheDocument();
+    });
+
+    // Initially, occasion should be empty string, which is invalid
+    // The validation only accepts "Birthday" or "Anniversary"
+    // An empty string should trigger the error message
+    await waitFor(() => {
+      const errorMessage = screen.getByText(
+        "Occasion must be either Birthday or Anniversary"
+      );
+      expect(errorMessage).toBeInTheDocument();
+      expect(errorMessage).toHaveClass("error-message");
+      expect(errorMessage).toHaveAttribute("aria-invalid", "true");
+    });
+
+    // Select a valid occasion
+    fireEvent.change(occasionSelect, { target: { value: "Birthday" } });
+
+    // Error should disappear when occasion is valid
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Occasion must be either Birthday or Anniversary")
+      ).not.toBeInTheDocument();
+    });
+
+    // Test with the other valid option
+    fireEvent.change(occasionSelect, { target: { value: "Anniversary" } });
+
+    // Error should still not be visible
+    expect(
+      screen.queryByText("Occasion must be either Birthday or Anniversary")
+    ).not.toBeInTheDocument();
+  });
+
+  test("Error messages have correct accessibility attributes", async () => {
+    render(<BookingSection />);
+    const dateInput = screen.getByLabelText("Choose reservation date");
+    const guestsInput = screen.getByLabelText("Number of guests");
+
+    // Wait for component to initialize
+    await waitFor(() => {
+      expect(dateInput).toBeInTheDocument();
+    });
+
+    // Trigger date error
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const pastDate = yesterday.toISOString().split("T")[0];
+    fireEvent.change(dateInput, { target: { value: pastDate } });
+
+    // Trigger guests error
+    fireEvent.change(guestsInput, { target: { value: "0" } });
+
+    // Wait for error messages to appear
+    await waitFor(() => {
+      const dateError = screen.getByText("Date must be today or later");
+      const guestsError = screen.getByText(
+        "Number of guests must be between 1 and 10"
+      );
+
+      // Check date error accessibility
+      expect(dateError).toHaveAttribute("aria-labelledby", "res-date");
+      expect(dateError).toHaveAttribute("aria-invalid", "true");
+
+      // Check guests error accessibility
+      expect(guestsError).toHaveAttribute("aria-labelledby", "guests");
+      expect(guestsError).toHaveAttribute("aria-invalid", "true");
+    });
+  });
+
+  test("Error messages disappear when field becomes valid", async () => {
+    render(<BookingSection />);
+    const dateInput = screen.getByLabelText("Choose reservation date");
+    const guestsInput = screen.getByLabelText("Number of guests");
+
+    // Wait for component to initialize
+    await waitFor(() => {
+      expect(dateInput).toBeInTheDocument();
+    });
+
+    // Trigger date error with past date
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const pastDate = yesterday.toISOString().split("T")[0];
+    fireEvent.change(dateInput, { target: { value: pastDate } });
+
+    // Trigger guests error
+    fireEvent.change(guestsInput, { target: { value: "0" } });
+
+    // Wait for error messages to appear
+    await waitFor(() => {
+      expect(
+        screen.getByText("Date must be today or later")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Number of guests must be between 1 and 10")
+      ).toBeInTheDocument();
+    });
+
+    // Fix the date (set to today or future)
+    const futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + 1);
+    const validDate = futureDate.toISOString().split("T")[0];
+    fireEvent.change(dateInput, { target: { value: validDate } });
+
+    // Fix the guests
+    fireEvent.change(guestsInput, { target: { value: "5" } });
+
+    // Wait for error messages to disappear
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Date must be today or later")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Number of guests must be between 1 and 10")
+      ).not.toBeInTheDocument();
+    });
+  });
+});

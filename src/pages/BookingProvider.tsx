@@ -30,10 +30,13 @@ export const BookingProvider = ({
       guests: 1,
       occasion: "",
     });
-  const [date, setDate] = useState<string>(() => {
-    if (bookingStateInStorage.date) return bookingStateInStorage.date;
+  const [todayDate] = useState<string>(() => {
     const date = new Date();
     return date.toISOString().split("T")[0];
+  });
+  const [date, setDate] = useState<string>(() => {
+    if (bookingStateInStorage.date) return bookingStateInStorage.date;
+    return todayDate;
   });
   const [time, setTime] = useState<string>(() => {
     if (bookingStateInStorage.time) return bookingStateInStorage.time;
@@ -67,6 +70,10 @@ export const BookingProvider = ({
   }
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!isValidDate || !isValidTime || !isValidGuests || !isValidOccasion) {
+      console.log("Form not submitted", { date, time, guests, occasion });
+      return;
+    }
     console.log("Form submitted", { date, time, guests, occasion });
     submitAPI({ date, time, guests, occasion });
   };
@@ -76,12 +83,38 @@ export const BookingProvider = ({
   useEffect(() => {
     setBookingStateInStorage({ date, time, guests, occasion });
   }, [date, time, guests, occasion, setBookingStateInStorage]);
+
+  // Validate date
+  const getIsValidDate = (date: string) => {
+    return date >= todayDate;
+  };
+  const getIsValidTime = (time: string, availableTimes: string[]) => {
+    return availableTimes.includes(time);
+  };
+  const getIsValidGuests = (guests: number) => {
+    return guests >= 1 && guests <= 10;
+  };
+  const getIsValidOccasion = (occasion: string) => {
+    return occasion === "Birthday" || occasion === "Anniversary";
+  };
+
+  const isValidDate = getIsValidDate(date);
+  const isValidTime = getIsValidTime(time, availableTimes);
+  const isValidGuests = getIsValidGuests(guests);
+  const isValidOccasion = getIsValidOccasion(occasion);
+
   const bookingState = {
     date,
     time,
     availableTimes,
     guests,
     occasion,
+
+    isValidDate,
+    isValidTime,
+    isValidGuests,
+    isValidOccasion,
+
     handleSubmit,
     setDate,
     setTime,
