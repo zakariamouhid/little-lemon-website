@@ -1,54 +1,81 @@
 import { useEffect, useReducer, useState } from "react";
 import { BookingContext } from "./BookingContext";
+import { fetchAPI, submitAPI } from "../api";
 
-const defaultAvailableTimes = [
-  "17:00",
-  "18:00",
-  "19:00",
-  "20:00",
-  "21:00",
-  "22:00",
-];
-
+const localStorageKey = "booking-state";
+function useStateWithLocalStorage<T>(key: string, initialValue: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(`Error loading ${key} from localStorage:`, error);
+      return initialValue;
+    }
+  });
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [value, key]);
+  return [value, setValue] as [T, React.Dispatch<React.SetStateAction<T>>];
+}
 export const BookingProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [date, setDate] = useState<string>("");
-  const [time, setTime] = useState<string>("");
+  const [bookingStateInStorage, setBookingStateInStorage] =
+    useStateWithLocalStorage(localStorageKey, {
+      date: "",
+      time: "",
+      guests: 1,
+      occasion: "",
+    });
+  const [date, setDate] = useState<string>(() => {
+    if (bookingStateInStorage.date) return bookingStateInStorage.date;
+    const date = new Date();
+    return date.toISOString().split("T")[0];
+  });
+  const [time, setTime] = useState<string>(() => {
+    if (bookingStateInStorage.time) return bookingStateInStorage.time;
+    return "";
+  });
+  const [guests, setGuests] = useState<number>(() => {
+    if (bookingStateInStorage.guests) return bookingStateInStorage.guests;
+    return 1;
+  });
+  const [occasion, setOccasion] = useState<string>(() => {
+    if (bookingStateInStorage.occasion) return bookingStateInStorage.occasion;
+    return "";
+  });
   const [availableTimes, dispatchAvailableTimes] = useReducer(
-    (state, action: { type: "reset" } | { type: "set-date"; date: string }) => {
+    (state, action: { type: "update"; availableTimes: string[] }) => {
       switch (action.type) {
-        case "reset":
-          return defaultAvailableTimes;
-        case "set-date":
-          // TODO: Implement time availability logic based on the selected date
-          return state;
+        case "update":
+          return action.availableTimes;
         default:
           return state;
       }
     },
-    defaultAvailableTimes
+    [] as string[]
   );
-  function initializeTimes() {
-    dispatchAvailableTimes({ type: "reset" });
+  async function updateTimes(date: string) {
+    const availableTimes = await fetchAPI(new Date(date));
+    dispatchAvailableTimes({ type: "update", availableTimes });
   }
-  function updateTimes(date: string) {
-    dispatchAvailableTimes({ type: "set-date", date });
+  async function initializeTimes() {
+    await updateTimes(date);
   }
-  const [guests, setGuests] = useState<number>(1);
-  const [occasion, setOccasion] = useState<string>("");
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted", { date, time, guests, occasion });
+    submitAPI({ date, time, guests, occasion });
   };
-  useEffect(() => {
-    initializeTimes();
-  }, []);
   useEffect(() => {
     updateTimes(date);
   }, [date]);
+  useEffect(() => {
+    setBookingStateInStorage({ date, time, guests, occasion });
+  }, [date, time, guests, occasion, setBookingStateInStorage]);
   const bookingState = {
     date,
     time,

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BookingSection } from "./BookingSection";
 
 test("Renders the BookingForm heading", () => {
@@ -14,42 +14,48 @@ test("Change Date", () => {
   expect(dateInput).toHaveValue("2025-12-06");
 });
 
-test("initializeTimes sets default available times on mount", () => {
+test("initializeTimes sets default available times on mount", async () => {
   render(<BookingSection />);
   const timeSelect = screen.getByLabelText("Choose reservation time");
 
-  // Check that default times are available
-  const defaultTimes = ["17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
-  defaultTimes.forEach((time) => {
-    const option = screen.getByRole("option", { name: time });
-    expect(option).toBeInTheDocument();
-    expect(option).toHaveValue(time);
+  // Wait for async API call to complete and state to update
+  await waitFor(() => {
+    expect(timeSelect.children.length).toBeGreaterThan(0);
   });
 
-  // Verify all options are present
-  expect(timeSelect.children.length).toBe(defaultTimes.length);
+  // Verify that available times are in valid format (HH:MM where HH is 17-23)
+  const timeOptions = Array.from(timeSelect.children) as HTMLOptionElement[];
+  timeOptions.forEach((option) => {
+    const timeValue = option.value;
+    // Time format should be HH:MM where HH is 17-23 and MM is 00 or 30
+    expect(timeValue).toMatch(/^(1[7-9]|2[0-3]):(00|30)$/);
+  });
 });
 
-test("updateTimes is called when date changes", () => {
+test("updateTimes is called when date changes", async () => {
   render(<BookingSection />);
   const dateInput = screen.getByLabelText("Choose reservation date");
   const timeSelect = screen.getByLabelText("Choose reservation time");
 
-  // Get initial available times count
-  const initialTimesCount = timeSelect.children.length;
+  // Wait for initial times to load
+  await waitFor(() => {
+    expect(timeSelect.children.length).toBeGreaterThan(0);
+  });
 
   // Change the date
   fireEvent.change(dateInput, { target: { value: "2025-12-06" } });
 
-  // Verify that updateTimes was called (available times should still be present)
-  // Since updateTimes currently just returns state, times should remain available
-  expect(timeSelect.children.length).toBe(initialTimesCount);
+  // Wait for times to update after date change
+  await waitFor(() => {
+    // Verify that updateTimes was called (available times should still be present)
+    expect(timeSelect.children.length).toBeGreaterThan(0);
+  });
 
   // Verify the date was updated
   expect(dateInput).toHaveValue("2025-12-06");
 });
 
-test("Submit form with all required fields", () => {
+test("Submit form with all required fields", async () => {
   // Mock console.log to verify handleSubmit is called
   const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
@@ -65,7 +71,16 @@ test("Submit form with all required fields", () => {
   });
 
   fireEvent.change(dateInput, { target: { value: "2025-12-06" } });
-  fireEvent.change(timeSelect, { target: { value: "19:00" } });
+
+  // Wait for times to load after date change
+  await waitFor(() => {
+    expect(timeSelect.children.length).toBeGreaterThan(0);
+  });
+
+  const timeOptions = Array.from(timeSelect.children) as HTMLOptionElement[];
+  const timeOption =
+    timeOptions[Math.floor(Math.random() * timeOptions.length)];
+  fireEvent.change(timeSelect, { target: { value: timeOption.value } });
   fireEvent.change(guestsInput, { target: { value: "4" } });
   fireEvent.change(occasionSelect, { target: { value: "Birthday" } });
 
@@ -75,7 +90,7 @@ test("Submit form with all required fields", () => {
   // Verify handleSubmit was called (console.log should be called with form data)
   expect(consoleSpy).toHaveBeenCalledWith("Form submitted", {
     date: "2025-12-06",
-    time: "19:00",
+    time: timeOption.value,
     guests: 4,
     occasion: "Birthday",
   });
