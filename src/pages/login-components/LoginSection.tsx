@@ -5,7 +5,7 @@ export function LoginSection() {
   return (
     <main className="login-section">
       <div className="container">
-        <h1 className="title">Login</h1>
+        <h1 className="title">Sign In</h1>
         <LoginForm />
       </div>
     </main>

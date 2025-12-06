@@ -5,6 +5,7 @@ export type LoginState = {
   user: {
     fullName: string;
     email: string;
+    password: string;
   } | null;
 
   // Form state
@@ -19,6 +20,8 @@ export type LoginState = {
   isValidEmail: boolean;
   isValidPassword: boolean;
   isValidPhoneNumber: boolean;
+  signInError: string | null;
+  signUpError: string | null;
   visitedFields: {
     fullName: boolean;
     email: boolean;
@@ -32,8 +35,8 @@ export type LoginState = {
   setEmail: (email: string) => void;
   setPassword: (password: string) => void;
   setPhoneNumber: (phoneNumber: string) => void;
-  handleSignUp: (e: React.FormEvent<HTMLFormElement>) => void;
-  handleSignIn: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleSignUp: (e: React.FormEvent<HTMLFormElement>) => boolean;
+  handleSignIn: (e: React.FormEvent<HTMLFormElement>) => boolean;
   signOut: () => void;
   resetForm: () => void;
 

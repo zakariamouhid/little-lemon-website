@@ -29,6 +29,8 @@ export type BookingState = {
   onTimeBlur: () => void;
   onGuestsBlur: () => void;
   onOccasionBlur: () => void;
+
+  isConfirmed: boolean;
 };
 
 export const BookingContext = createContext<BookingState | undefined>(

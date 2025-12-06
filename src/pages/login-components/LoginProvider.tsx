@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import { LoginContext } from "./LoginContext";
 
 const localStorageKey = "login-state";
+const usersSignupsKey = "users-signups";
+
+type User = {
+  fullName: string;
+  email: string;
+  password: string;
+};
 
 function useStateWithLocalStorage<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(() => {
@@ -23,22 +30,36 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
   const [loginStateInStorage, setLoginStateInStorage] =
     useStateWithLocalStorage(localStorageKey, {
       isLoggedIn: false,
-      user: null as { fullName: string; email: string } | null,
+      user: null as User | null,
     });
+
+  const [usersSignups, setUsersSignups] = useStateWithLocalStorage<User[]>(
+    usersSignupsKey,
+    []
+  );
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
     loginStateInStorage.isLoggedIn
   );
-  const [user, setUser] = useState<{
-    fullName: string;
-    email: string;
-  } | null>(loginStateInStorage.user);
+  const [user, setUser] = useState<User | null>(loginStateInStorage.user);
 
   const [isSignUp, setIsSignUp] = useState<boolean>(true);
   const [fullName, setFullName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmailState] = useState<string>("");
+  const [password, setPasswordState] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
+
+  // Wrapper functions to clear errors when user types
+  const setEmail = (value: string) => {
+    setEmailState(value);
+    setSignInError(null);
+    setSignUpError(null);
+  };
+
+  const setPassword = (value: string) => {
+    setPasswordState(value);
+    setSignInError(null);
+  };
 
   const [visitedFields, setVisitedFields] = useState({
     fullName: false,
@@ -46,6 +67,9 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     password: false,
     phoneNumber: false,
   });
+
+  const [signInError, setSignInError] = useState<string | null>(null);
+  const [signUpError, setSignUpError] = useState<string | null>(null);
 
   // Validation functions
   const getIsValidFullName = (name: string) => {
@@ -92,8 +116,9 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Sign up handler
-  const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignUp = (e: React.FormEvent<HTMLFormElement>): boolean => {
     e.preventDefault();
+    setSignUpError(null);
     if (
       !isValidFullName ||
       !isValidEmail ||
@@ -112,15 +137,39 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
         password: true,
         phoneNumber: true,
       });
-      return;
+      return false;
+    }
+
+    // Check if user already exists
+    const emailLower = email.trim().toLowerCase();
+    const existingUser = usersSignups.find(
+      (u) => u.email.toLowerCase() === emailLower
+    );
+
+    if (existingUser) {
+      setSignUpError(
+        "An account with this email already exists. Please sign in instead."
+      );
+      setVisitedFields({
+        fullName: true,
+        email: true,
+        password: true,
+        phoneNumber: true,
+      });
+      return false;
     }
 
     // Store user data (in a real app, this would be an API call)
-    const newUser = {
+    const newUser: User = {
       fullName: fullName.trim(),
       email: email.trim(),
+      password: password,
     };
 
+    // Add to users list
+    setUsersSignups([...usersSignups, newUser]);
+
+    // Set as logged in user
     setUser(newUser);
     setIsLoggedIn(true);
     setLoginStateInStorage({
@@ -133,6 +182,7 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     setEmail("");
     setPassword("");
     setPhoneNumber("");
+    setSignUpError(null);
     setVisitedFields({
       fullName: false,
       email: false,
@@ -141,11 +191,13 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     console.log("User signed up successfully", newUser);
+    return true;
   };
 
   // Sign in handler
-  const handleSignIn = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignIn = (e: React.FormEvent<HTMLFormElement>): boolean => {
     e.preventDefault();
+    setSignInError(null);
     if (!isValidEmail || !isValidPassword) {
       console.log("Sign in form not submitted", { email, password });
       setVisitedFields({
@@ -154,17 +206,17 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
         password: true,
         phoneNumber: false,
       });
-      return;
+      return false;
     }
 
     // In a real app, this would verify credentials with an API
-    // For now, we'll check if user exists in localStorage
-    // In a real scenario, you'd verify the password
-    const storedUser = loginStateInStorage.user;
-    if (
-      storedUser &&
-      storedUser.email.toLowerCase() === email.trim().toLowerCase()
-    ) {
+    // Check if user exists in the users list and verify the password
+    const emailLower = email.trim().toLowerCase();
+    const storedUser = usersSignups.find(
+      (u) => u.email.toLowerCase() === emailLower && u.password === password
+    );
+
+    if (storedUser) {
       setUser(storedUser);
       setIsLoggedIn(true);
       setLoginStateInStorage({
@@ -175,6 +227,7 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
       // Reset form
       setEmail("");
       setPassword("");
+      setSignInError(null);
       setVisitedFields({
         fullName: false,
         email: false,
@@ -183,14 +236,16 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       console.log("User signed in successfully", storedUser);
+      return true;
     } else {
-      alert("Invalid email or password. Please try again or sign up.");
+      setSignInError("Invalid email or password. Please try again or sign up.");
       setVisitedFields({
         fullName: false,
         email: true,
         password: true,
         phoneNumber: false,
       });
+      return false;
     }
   };
 
@@ -211,6 +266,8 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     setEmail("");
     setPassword("");
     setPhoneNumber("");
+    setSignInError(null);
+    setSignUpError(null);
     setVisitedFields({
       fullName: false,
       email: false,
@@ -239,6 +296,8 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     isValidEmail,
     isValidPassword,
     isValidPhoneNumber,
+    signInError,
+    signUpError,
     visitedFields,
     setIsSignUp,
     setFullName,

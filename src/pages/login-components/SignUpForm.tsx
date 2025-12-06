@@ -1,8 +1,10 @@
-import { Link } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useLoginState } from "./LoginContext";
 import "./LoginForm.css";
 
 export function SignUpForm() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     fullName,
     email,
@@ -12,6 +14,7 @@ export function SignUpForm() {
     isValidEmail,
     isValidPassword,
     isValidPhoneNumber,
+    signUpError,
     visitedFields,
     setFullName,
     setEmail,
@@ -24,6 +27,14 @@ export function SignUpForm() {
     onPasswordBlur,
     onPhoneNumberBlur,
   } = useLoginState();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const success = handleSignUp(e);
+    if (success) {
+      const redirectPath = searchParams.get("redirect") || "/";
+      navigate(redirectPath);
+    }
+  };
 
   const requiredIndicator = (
     <span aria-label="required" className="required-indicator">
@@ -40,7 +51,7 @@ export function SignUpForm() {
     <div className="login-form-container">
       <form
         className="login-form"
-        onSubmit={handleSignUp}
+        onSubmit={handleSubmit}
         aria-label="Sign up form"
       >
         <div className="form-row">
@@ -142,6 +153,12 @@ export function SignUpForm() {
           )}
         </div>
 
+        {signUpError && (
+          <p className="error-message" aria-live="polite" role="alert">
+            {signUpError}
+          </p>
+        )}
+
         <input
           type="submit"
           value="Sign Up"
@@ -153,7 +170,7 @@ export function SignUpForm() {
       <div className="toggle-container">
         <span className="toggle-text">Already a member? </span>
         <Link to="/login" className="toggle-button" onClick={resetForm}>
-          Log In
+          Sign In
         </Link>
       </div>
     </div>

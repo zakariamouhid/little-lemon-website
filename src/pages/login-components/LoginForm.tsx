@@ -1,13 +1,16 @@
-import { Link } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useLoginState } from "./LoginContext";
 import "./LoginForm.css";
 
 export function LoginForm() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     email,
     password,
     isValidEmail,
     isValidPassword,
+    signInError,
     visitedFields,
     setEmail,
     setPassword,
@@ -16,6 +19,14 @@ export function LoginForm() {
     onEmailBlur,
     onPasswordBlur,
   } = useLoginState();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const success = handleSignIn(e);
+    if (success) {
+      const redirectPath = searchParams.get("redirect") || "/";
+      navigate(redirectPath);
+    }
+  };
 
   const requiredIndicator = (
     <span aria-label="required" className="required-indicator">
@@ -27,7 +38,7 @@ export function LoginForm() {
     <div className="login-form-container">
       <form
         className="login-form"
-        onSubmit={handleSignIn}
+        onSubmit={handleSubmit}
         aria-label="Sign in form"
       >
         <div className="form-row">
@@ -79,6 +90,12 @@ export function LoginForm() {
             </p>
           )}
         </div>
+
+        {signInError && (
+          <p className="error-message" aria-live="polite" role="alert">
+            {signInError}
+          </p>
+        )}
 
         <input
           type="submit"

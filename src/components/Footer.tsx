@@ -27,7 +27,7 @@ export function Footer() {
           href: "/order-online",
         },
         {
-          label: "Login",
+          label: "Sign In",
           href: "/login",
         },
       ],

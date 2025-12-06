@@ -2,7 +2,7 @@ import { useEffect, useReducer, useState } from "react";
 import { BookingContext } from "./BookingContext";
 import { fetchAPI, submitAPI } from "../../api";
 import { useLoginState } from "../login-components/LoginContext";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 
 const localStorageKey = "booking-state";
 function useStateWithLocalStorage<T>(key: string, initialValue: T) {
@@ -36,19 +36,30 @@ export const BookingProvider = ({
     const date = new Date();
     return date.toISOString().split("T")[0];
   });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize from URL params if available, otherwise from localStorage or defaults
   const [date, setDate] = useState<string>(() => {
+    const urlDate = searchParams.get("date");
+    if (urlDate) return urlDate;
     if (bookingStateInStorage.date) return bookingStateInStorage.date;
     return todayDate;
   });
   const [time, setTime] = useState<string>(() => {
+    const urlTime = searchParams.get("time");
+    if (urlTime) return urlTime;
     if (bookingStateInStorage.time) return bookingStateInStorage.time;
     return "";
   });
   const [guests, setGuests] = useState<number>(() => {
+    const urlGuests = searchParams.get("guests");
+    if (urlGuests) return parseInt(urlGuests, 10);
     if (bookingStateInStorage.guests) return bookingStateInStorage.guests;
     return 1;
   });
   const [occasion, setOccasion] = useState<string>(() => {
+    const urlOccasion = searchParams.get("occasion");
+    if (urlOccasion) return urlOccasion;
     if (bookingStateInStorage.occasion) return bookingStateInStorage.occasion;
     return "";
   });
@@ -87,10 +98,24 @@ export const BookingProvider = ({
     }
     console.log("Form submitted", { date, time, guests, occasion });
     if (!isLoggedIn) {
-      navigate("/login");
+      navigate(
+        "/login?" +
+          new URLSearchParams({
+            redirect:
+              "/booking?" +
+              new URLSearchParams({
+                date: date.toString(),
+                time,
+                guests: guests.toString(),
+                occasion,
+                "auto-submit": "true",
+              }).toString(),
+          }).toString()
+      );
       return;
     }
     submitAPI({ date, time, guests, occasion });
+    setIsConfirmed(true);
   };
   useEffect(() => {
     updateTimes(date);
@@ -100,6 +125,7 @@ export const BookingProvider = ({
   }, [date, time, guests, occasion, setBookingStateInStorage]);
 
   const [occasionOptions] = useState(["Birthday", "Engagement", "Anniversary"]);
+  const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
 
   // Validate date
   const getIsValidDate = (date: string) => {
@@ -139,6 +165,44 @@ export const BookingProvider = ({
   const isValidGuests = getIsValidGuests(guests);
   const isValidOccasion = getIsValidOccasion(occasion);
 
+  // Auto-submit when auto-submit param is true and conditions are met
+  useEffect(() => {
+    const autoSubmit = searchParams.get("auto-submit") === "true";
+    if (
+      autoSubmit &&
+      isLoggedIn &&
+      isValidDate &&
+      isValidTime &&
+      isValidGuests &&
+      isValidOccasion &&
+      availableTimes.length > 0 &&
+      !isConfirmed
+    ) {
+      // Remove auto-submit param from URL
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete("auto-submit");
+      setSearchParams(newSearchParams, { replace: true });
+
+      // Auto-submit the booking
+      submitAPI({ date, time, guests, occasion });
+      setIsConfirmed(true);
+    }
+  }, [
+    searchParams,
+    isLoggedIn,
+    isValidDate,
+    isValidTime,
+    isValidGuests,
+    isValidOccasion,
+    availableTimes.length,
+    isConfirmed,
+    date,
+    time,
+    guests,
+    occasion,
+    setSearchParams,
+  ]);
+
   const bookingState = {
     date,
     time,
@@ -165,6 +229,8 @@ export const BookingProvider = ({
     onTimeBlur,
     onGuestsBlur,
     onOccasionBlur,
+
+    isConfirmed,
   };
   return (
     <BookingContext.Provider value={bookingState}>

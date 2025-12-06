@@ -1,6 +1,8 @@
 import { Link } from "react-router";
+import { useLoginState } from "../pages/login-components/LoginContext";
 
 export function NavLinks() {
+  const { isLoggedIn } = useLoginState();
   // HOME
   // ABOUT
   // MENU
@@ -28,10 +30,15 @@ export function NavLinks() {
       label: "Order Online",
       href: "/",
     },
-    {
-      label: "Login",
-      href: "/login",
-    },
+    !isLoggedIn
+      ? {
+          label: "Sign In",
+          href: "/login",
+        }
+      : {
+          label: "Sign Out",
+          href: "/logout",
+        },
   ];
   return (
     <nav className="nav">
