@@ -61,15 +61,15 @@ export function Footer() {
       links: [
         {
           label: "Instagram",
-          href: "/instagram",
+          href: "https://www.instagram.com/zakaria_mouhid",
         },
         {
           label: "Twitter",
-          href: "/twitter",
+          href: "https://x.com/zakariamouhid1",
         },
         {
           label: "YouTube",
-          href: "/youtube",
+          href: "https://www.youtube.com/@coursera",
         },
       ],
     },
