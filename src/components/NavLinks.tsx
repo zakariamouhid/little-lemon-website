@@ -26,7 +26,7 @@ export function NavLinks({
     },
     {
       label: "Menu",
-      href: "/",
+      href: "/menu",
     },
     {
       label: "Contact",

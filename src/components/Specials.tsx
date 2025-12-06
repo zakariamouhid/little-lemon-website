@@ -1,9 +1,14 @@
+import { Link } from "react-router";
 import specialImage1 from "../assets/special-1.jpg";
 import specialImage2 from "../assets/special-2.jpg";
 import specialImage3 from "../assets/special-3.jpg";
 import { SpecialsCard } from "./SpecialsCard";
 
-export function Specials() {
+export function Specials({
+  showOnlineMenuButton = true,
+}: {
+  showOnlineMenuButton?: boolean;
+}) {
   const specials = [
     {
       title: "Greek Salad",
@@ -32,7 +37,11 @@ export function Specials() {
       <div className="container">
         <div className="specials-header">
           <h2 className="title">This weeks specials!</h2>
-          <button className="button">Online Menu</button>
+          {showOnlineMenuButton && (
+            <Link to="/menu" className="button">
+              Online Menu
+            </Link>
+          )}
         </div>
         <div className="specials-cards">
           {specials.map((special) => (

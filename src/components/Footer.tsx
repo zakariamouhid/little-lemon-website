@@ -1,7 +1,9 @@
 import { Link } from "react-router";
 import footerImage from "../assets/footer.jpg";
+import { useLoginState } from "../pages/login-components/LoginContext";
 
 export function Footer() {
+  const { isLoggedIn } = useLoginState();
   const linksColumns = [
     {
       title: "Doormat Navigation",
@@ -12,7 +14,7 @@ export function Footer() {
         },
         {
           label: "About",
-          href: "/about",
+          href: "/",
         },
         {
           label: "Menu",
@@ -20,16 +22,21 @@ export function Footer() {
         },
         {
           label: "Contact",
-          href: "/contact",
+          href: "/",
         },
         {
           label: "Order Online",
-          href: "/order-online",
+          href: "/",
         },
-        {
-          label: "Sign In",
-          href: "/login",
-        },
+        !isLoggedIn
+          ? {
+              label: "Sign In",
+              href: "/login",
+            }
+          : {
+              label: "Sign Out",
+              href: "/logout",
+            },
       ],
     },
     {
