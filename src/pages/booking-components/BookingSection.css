@@ -11,10 +11,3 @@
   margin: 0;
   text-align: center;
 }
-
-.booking-form {
-  display: grid;
-  max-width: 200px;
-  gap: 20px;
-  margin: 0 auto;
-}

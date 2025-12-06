@@ -1,0 +1,95 @@
+.booking-form {
+  display: grid;
+  max-width: 360px;
+  gap: 30px;
+  margin: 30px auto 0;
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 0;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+
+.booking-form .form-row {
+  display: grid;
+  gap: 6px;
+}
+
+.booking-form label {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.required-indicator {
+  color: red;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.optional-indicator {
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+}
+
+.booking-form input,
+.booking-form select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.booking-form input[type="number"],
+.booking-form input[type="date"],
+.booking-form select {
+  padding: 8px 16px;
+  border: solid 1px #495e57;
+  border-radius: 8px;
+}
+
+.booking-form input[type="submit"] {
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+.number-input-wrapper {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+}
+
+.number-input-wrapper button {
+  background-color: #fff;
+  font-family: "Markazi Text";
+  font-size: 50px;
+  padding: 0;
+  width: 36px;
+  height: 37px;
+  border: solid 1px #495e57;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.select-wrapper.with-icon {
+  position: relative;
+}
+
+.select-wrapper.with-icon > select {
+  padding-left: 40px;
+  width: 100%;
+  display: block;
+}
+
+.select-icon {
+  position: absolute;
+  left: 12px;
+  top: 0;
+  width: 22px;
+  height: 39px;
+  pointer-events: none;
+  fill: #495e57;
+}

@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
 import { BookingContext } from "./BookingContext";
-import { fetchAPI, submitAPI } from "../api";
+import { fetchAPI, submitAPI } from "../../api";
 
 const localStorageKey = "booking-state";
 function useStateWithLocalStorage<T>(key: string, initialValue: T) {
@@ -72,6 +72,13 @@ export const BookingProvider = ({
     e.preventDefault();
     if (!isValidDate || !isValidTime || !isValidGuests || !isValidOccasion) {
       console.log("Form not submitted", { date, time, guests, occasion });
+      setVisitedFields({
+        ...visitedFields,
+        date: true,
+        time: true,
+        guests: true,
+        occasion: true,
+      });
       return;
     }
     console.log("Form submitted", { date, time, guests, occasion });
@@ -84,6 +91,8 @@ export const BookingProvider = ({
     setBookingStateInStorage({ date, time, guests, occasion });
   }, [date, time, guests, occasion, setBookingStateInStorage]);
 
+  const [occasionOptions] = useState(["Birthday", "Engagement", "Anniversary"]);
+
   // Validate date
   const getIsValidDate = (date: string) => {
     return date >= todayDate;
@@ -95,7 +104,26 @@ export const BookingProvider = ({
     return guests >= 1 && guests <= 10;
   };
   const getIsValidOccasion = (occasion: string) => {
-    return occasion === "Birthday" || occasion === "Anniversary";
+    return !occasion || occasionOptions.includes(occasion);
+  };
+
+  const [visitedFields, setVisitedFields] = useState({
+    date: false,
+    time: false,
+    guests: false,
+    occasion: false,
+  });
+  const onDateBlur = () => {
+    setVisitedFields({ ...visitedFields, date: true });
+  };
+  const onTimeBlur = () => {
+    setVisitedFields({ ...visitedFields, time: true });
+  };
+  const onGuestsBlur = () => {
+    setVisitedFields({ ...visitedFields, guests: true });
+  };
+  const onOccasionBlur = () => {
+    setVisitedFields({ ...visitedFields, occasion: true });
   };
 
   const isValidDate = getIsValidDate(date);
@@ -109,11 +137,13 @@ export const BookingProvider = ({
     availableTimes,
     guests,
     occasion,
+    occasionOptions,
 
     isValidDate,
     isValidTime,
     isValidGuests,
     isValidOccasion,
+    visitedFields,
 
     handleSubmit,
     setDate,
@@ -122,6 +152,11 @@ export const BookingProvider = ({
     setOccasion,
     initializeTimes,
     updateTimes,
+
+    onDateBlur,
+    onTimeBlur,
+    onGuestsBlur,
+    onOccasionBlur,
   };
   return (
     <BookingContext.Provider value={bookingState}>

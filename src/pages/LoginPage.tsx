@@ -1,12 +1,12 @@
 import { Footer } from "../components/Footer";
 import { Nav } from "../components/Nav";
-import { BookingSection } from "./booking-components/BookingSection";
+import { LoginSection } from "./login-components/LoginSection";
 
-export default function BookingPage() {
+export default function LoginPage() {
   return (
     <>
       <Nav />
-      <BookingSection />
+      <LoginSection />
       <Footer />
     </>
   );

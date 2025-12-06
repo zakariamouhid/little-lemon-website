@@ -1,11 +1,12 @@
+import { Link } from "react-router";
 import logo from "../assets/logo.png";
 import { NavLinks } from "./NavLinks";
 
 export function Logo() {
   return (
-    <a href="/" className="logo">
+    <Link to="/" className="logo">
       <img src={logo} alt="Little Lemon" width={200} height={55} />
-    </a>
+    </Link>
   );
 }
 

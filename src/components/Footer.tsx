@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import footerImage from "../assets/footer.jpg";
 
 export function Footer() {
@@ -84,7 +85,7 @@ export function Footer() {
             <ul className="footer-list">
               {column.links.map((link) => (
                 <li key={link.label} className="footer-link">
-                  <a href={link.href}>{link.label}</a>
+                  <Link to={link.href}>{link.label}</Link>
                 </li>
               ))}
             </ul>

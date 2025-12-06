@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 export function NavLinks() {
   // HOME
   // ABOUT
@@ -12,19 +14,19 @@ export function NavLinks() {
     },
     {
       label: "About",
-      href: "/about",
+      href: "/",
     },
     {
       label: "Menu",
-      href: "/menu",
+      href: "/",
     },
     {
       label: "Contact",
-      href: "/contact",
+      href: "/",
     },
     {
       label: "Order Online",
-      href: "/order-online",
+      href: "/",
     },
     {
       label: "Login",
@@ -36,9 +38,9 @@ export function NavLinks() {
       <ul className="nav-list">
         {navItems.map((item) => (
           <li key={item.label}>
-            <a href={item.href} className="nav-link">
+            <Link to={item.href} className="nav-link">
               {item.label}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
