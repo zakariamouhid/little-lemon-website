@@ -38,11 +38,13 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
   const [fullName, setFullName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
 
   const [visitedFields, setVisitedFields] = useState({
     fullName: false,
     email: false,
     password: false,
+    phoneNumber: false,
   });
 
   // Validation functions
@@ -59,9 +61,18 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     return password.length >= 6;
   };
 
+  const getIsValidPhoneNumber = (phone: string) => {
+    // Phone number is optional, so it's valid if empty
+    if (!phone.trim()) return true;
+    // If provided, validate format (allows digits, spaces, dashes, parentheses, plus)
+    const phoneRegex = /^[\d\s\-+()]+$/;
+    return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 10;
+  };
+
   const isValidFullName = getIsValidFullName(fullName);
   const isValidEmail = getIsValidEmail(email);
   const isValidPassword = getIsValidPassword(password);
+  const isValidPhoneNumber = getIsValidPhoneNumber(phoneNumber);
 
   // Blur handlers
   const onFullNameBlur = () => {
@@ -76,15 +87,30 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     setVisitedFields({ ...visitedFields, password: true });
   };
 
+  const onPhoneNumberBlur = () => {
+    setVisitedFields({ ...visitedFields, phoneNumber: true });
+  };
+
   // Sign up handler
   const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isValidFullName || !isValidEmail || !isValidPassword) {
-      console.log("Sign up form not submitted", { fullName, email, password });
+    if (
+      !isValidFullName ||
+      !isValidEmail ||
+      !isValidPassword ||
+      !isValidPhoneNumber
+    ) {
+      console.log("Sign up form not submitted", {
+        fullName,
+        email,
+        password,
+        phoneNumber,
+      });
       setVisitedFields({
         fullName: true,
         email: true,
         password: true,
+        phoneNumber: true,
       });
       return;
     }
@@ -106,10 +132,12 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     setFullName("");
     setEmail("");
     setPassword("");
+    setPhoneNumber("");
     setVisitedFields({
       fullName: false,
       email: false,
       password: false,
+      phoneNumber: false,
     });
 
     console.log("User signed up successfully", newUser);
@@ -124,6 +152,7 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
         fullName: false,
         email: true,
         password: true,
+        phoneNumber: false,
       });
       return;
     }
@@ -150,6 +179,7 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
         fullName: false,
         email: false,
         password: false,
+        phoneNumber: false,
       });
 
       console.log("User signed in successfully", storedUser);
@@ -159,6 +189,7 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
         fullName: false,
         email: true,
         password: true,
+        phoneNumber: false,
       });
     }
   };
@@ -179,10 +210,12 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     setFullName("");
     setEmail("");
     setPassword("");
+    setPhoneNumber("");
     setVisitedFields({
       fullName: false,
       email: false,
       password: false,
+      phoneNumber: false,
     });
   };
 
@@ -201,14 +234,17 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     fullName,
     email,
     password,
+    phoneNumber,
     isValidFullName,
     isValidEmail,
     isValidPassword,
+    isValidPhoneNumber,
     visitedFields,
     setIsSignUp,
     setFullName,
     setEmail,
     setPassword,
+    setPhoneNumber,
     handleSignUp,
     handleSignIn,
     signOut,
@@ -216,6 +252,7 @@ export const LoginProvider = ({ children }: { children: React.ReactNode }) => {
     onFullNameBlur,
     onEmailBlur,
     onPasswordBlur,
+    onPhoneNumberBlur,
   };
 
   return (

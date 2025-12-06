@@ -12,15 +12,18 @@ export type LoginState = {
   fullName: string;
   email: string;
   password: string;
+  phoneNumber: string;
 
   // Validation
   isValidFullName: boolean;
   isValidEmail: boolean;
   isValidPassword: boolean;
+  isValidPhoneNumber: boolean;
   visitedFields: {
     fullName: boolean;
     email: boolean;
     password: boolean;
+    phoneNumber: boolean;
   };
 
   // Actions
@@ -28,6 +31,7 @@ export type LoginState = {
   setFullName: (fullName: string) => void;
   setEmail: (email: string) => void;
   setPassword: (password: string) => void;
+  setPhoneNumber: (phoneNumber: string) => void;
   handleSignUp: (e: React.FormEvent<HTMLFormElement>) => void;
   handleSignIn: (e: React.FormEvent<HTMLFormElement>) => void;
   signOut: () => void;
@@ -37,6 +41,7 @@ export type LoginState = {
   onFullNameBlur: () => void;
   onEmailBlur: () => void;
   onPasswordBlur: () => void;
+  onPhoneNumberBlur: () => void;
 };
 
 export const LoginContext = createContext<LoginState | undefined>(undefined);

@@ -39,7 +39,8 @@
 
 .login-form input[type="text"],
 .login-form input[type="email"],
-.login-form input[type="password"] {
+.login-form input[type="password"],
+.login-form input[type="tel"] {
   font-family: inherit;
   font-size: inherit;
   padding: 8px 16px;
@@ -76,6 +77,7 @@
   padding: 0;
   margin-left: 4px;
   font-family: inherit;
+  text-decoration: none;
 }
 
 .toggle-button:hover {
