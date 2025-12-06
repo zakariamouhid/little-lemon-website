@@ -1,7 +1,13 @@
 import { Link } from "react-router";
 import { useLoginState } from "../pages/login-components/LoginContext";
 
-export function NavLinks() {
+export function NavLinks({
+  isMenuOpen,
+  setIsMenuOpen,
+}: {
+  isMenuOpen: boolean;
+  setIsMenuOpen: (isMenuOpen: boolean) => void;
+}) {
   const { isLoggedIn } = useLoginState();
   // HOME
   // ABOUT
@@ -41,11 +47,26 @@ export function NavLinks() {
         },
   ];
   return (
-    <nav className="nav">
+    <nav
+      className={`nav ${isMenuOpen ? "nav-menu-open" : ""}`}
+      aria-expanded={isMenuOpen}
+      aria-label={
+        isMenuOpen ? "Closed navigation menu" : "Main navigation menu"
+      }
+      role="navigation"
+    >
       <ul className="nav-list">
         {navItems.map((item) => (
           <li key={item.label}>
-            <Link to={item.href} className="nav-link">
+            <Link
+              to={item.href}
+              className="nav-link"
+              onFocus={() => {
+                if (!isMenuOpen) {
+                  setIsMenuOpen(true);
+                }
+              }}
+            >
               {item.label}
             </Link>
           </li>
