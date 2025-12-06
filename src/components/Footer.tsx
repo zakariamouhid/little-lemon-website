@@ -4,7 +4,15 @@ import { useLoginState } from "../pages/login-components/LoginContext";
 
 export function Footer() {
   const { isLoggedIn } = useLoginState();
-  const linksColumns = [
+  const linksColumns: {
+    title: string;
+    links: {
+      label: string;
+      href: string;
+      target?: string;
+      rel?: string;
+    }[];
+  }[] = [
     {
       title: "Doormat Navigation",
       links: [
@@ -62,14 +70,20 @@ export function Footer() {
         {
           label: "Instagram",
           href: "https://www.instagram.com/zakaria_mouhid",
+          target: "_blank",
+          rel: "noopener noreferrer",
         },
         {
           label: "Twitter",
           href: "https://x.com/zakariamouhid1",
+          target: "_blank",
+          rel: "noopener noreferrer",
         },
         {
           label: "YouTube",
           href: "https://www.youtube.com/@coursera",
+          target: "_blank",
+          rel: "noopener noreferrer",
         },
       ],
     },
@@ -92,7 +106,9 @@ export function Footer() {
             <ul className="footer-list">
               {column.links.map((link) => (
                 <li key={link.label} className="footer-link">
-                  <Link to={link.href}>{link.label}</Link>
+                  <Link to={link.href} target={link.target} rel={link.rel}>
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
