@@ -1,0 +1,13 @@
+.login-section {
+  background-color: #edefee;
+  padding: 40px 0;
+}
+
+.login-section .title {
+  font-family: "Markazi Text", serif;
+  font-size: 40px;
+  line-height: 0.5em;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+}

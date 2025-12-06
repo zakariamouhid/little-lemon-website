@@ -1,0 +1,89 @@
+.login-form-container {
+  display: grid;
+  gap: 20px;
+}
+
+.login-form {
+  display: grid;
+  max-width: 360px;
+  gap: 30px;
+  margin: 30px auto 0;
+  width: 100%;
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 0;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+
+.login-form .form-row {
+  display: grid;
+  gap: 6px;
+}
+
+.login-form label {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.required-indicator {
+  color: red;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.login-form input[type="text"],
+.login-form input[type="email"],
+.login-form input[type="password"] {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 8px 16px;
+  border: solid 1px #495e57;
+  border-radius: 8px;
+}
+
+.login-form input[type="submit"] {
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  gap: 0;
+}
+
+.toggle-text {
+  color: #000;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  color: #495e57;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  font-family: inherit;
+}
+
+.toggle-button:hover {
+  color: #333;
+}
+
+.toggle-button:focus {
+  outline: 2px solid #495e57;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

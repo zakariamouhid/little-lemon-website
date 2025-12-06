@@ -1,6 +1,8 @@
 import { useEffect, useReducer, useState } from "react";
 import { BookingContext } from "./BookingContext";
 import { fetchAPI, submitAPI } from "../../api";
+import { useLoginState } from "../login-components/LoginContext";
+import { useNavigate } from "react-router";
 
 const localStorageKey = "booking-state";
 function useStateWithLocalStorage<T>(key: string, initialValue: T) {
@@ -68,6 +70,8 @@ export const BookingProvider = ({
   async function initializeTimes() {
     await updateTimes(date);
   }
+  const { isLoggedIn } = useLoginState();
+  const navigate = useNavigate();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isValidDate || !isValidTime || !isValidGuests || !isValidOccasion) {
@@ -82,6 +86,10 @@ export const BookingProvider = ({
       return;
     }
     console.log("Form submitted", { date, time, guests, occasion });
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
     submitAPI({ date, time, guests, occasion });
   };
   useEffect(() => {
